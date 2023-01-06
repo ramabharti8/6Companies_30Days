@@ -1,0 +1,24 @@
+/*
+ * @lc app=leetcode id=1227 lang=java
+ *
+ * [1227] Airplane Seat Assignment Probability
+ */
+
+// @lc code=start
+//dp solution
+class Solution {
+    public double nthPersonGetsNthSeat(int n) {
+        if(n==1)
+            return 1;
+        double[] strg = new double[n];
+        strg[0] = 1.0;
+        strg[1] = 0.5;
+        for(int i=2;i<strg.length;i++){
+            double d = (1/(1.0*n)) + ((n-2)/(1.0*n))*(strg[i-1]);
+            strg[i] = d;
+        }
+        return strg[n-1];
+    }
+}
+// @lc code=end
+

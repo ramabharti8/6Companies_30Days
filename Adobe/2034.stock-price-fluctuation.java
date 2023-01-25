@@ -6,52 +6,50 @@
 
 // @lc code=start
 class StockPrice {
-    private int currentStockPrice;
-    private int currentTimestamp;
-    private final Map<Integer, Integer> timestampPrices;
-    private final Map<Integer, Integer> occurrences;
-    
+    //SPACE: O(N)
+    Queue<int[]> maxQ;
+    Queue<int[]> minQ;
+    HashMap<Integer,Integer> tpMap;
+    int latestTimestamp;
     public StockPrice() {
-        currentStockPrice = 0;
-        currentTimestamp = 0;
-        occurrences = new HashMap();
-        timestampPrices = new HashMap();
+        maxQ = new PriorityQueue<>((a,b) -> b[1] - a[1]);
+        minQ = new PriorityQueue<>((a,b) -> a[1] - b[1]);
+        tpMap = new HashMap<>();
+        latestTimestamp = 0;
     }
-    
+    //Time: O(LOG N)
     public void update(int timestamp, int price) {
-        if(timestamp >= currentTimestamp) {
-            currentTimestamp = timestamp;
-            currentStockPrice = price;
-        }
-        if(timestampPrices.containsKey(timestamp)) {
-            int oldPrice = timestampPrices.get(timestamp);
-            if(occurrences.get(oldPrice) == 1) {
-                occurrences.remove(oldPrice);
-            } else {
-                occurrences.put(oldPrice, occurrences.get(oldPrice)-1);
-            }
-        }
-        timestampPrices.put(timestamp, price);
-        occurrences.put(price, occurrences.getOrDefault(price, 0)+1);
+        //Updating latestTimestamp
+        latestTimestamp = timestamp > latestTimestamp ? timestamp : latestTimestamp;
+
+        //adding prices to queues
+        maxQ.add(new int[]{timestamp,price});
+        minQ.add(new int[]{timestamp,price});
+
+        //Updating-Adding register of price at timestamp
+        tpMap.put(timestamp,price);
     }
-    
+    //Time: O(1)
     public int current() {
-        return currentStockPrice;
+        return tpMap.get(latestTimestamp);
     }
-    
+    //Time: O(N LOG N)
     public int maximum() {
-        List<Integer> prices = new ArrayList(occurrences.keySet());
-        Collections.sort(prices);
-        return prices.get(prices.size()-1);
+        //Find the first max value that corresponds with value saved in hashmap
+        // to validate that is the correct one.
+        while(maxQ.peek()[1] != tpMap.get(maxQ.peek()[0])){
+            maxQ.poll();
+        }
+        return maxQ.peek()[1];
     }
-    
+    //Time: O(N LOG N)
     public int minimum() {
-        List<Integer> prices = new ArrayList(occurrences.keySet());
-        Collections.sort(prices);
-        return prices.get(0);
+        while(minQ.peek()[1] != tpMap.get(minQ.peek()[0])){
+            minQ.poll();
+        }
+        return minQ.peek()[1];
     }
 }
-
 /**
  * Your StockPrice object will be instantiated and called as such:
  * StockPrice obj = new StockPrice();
